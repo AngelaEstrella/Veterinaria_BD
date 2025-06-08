@@ -14,12 +14,17 @@ const RoleSelection = () => {
     <div className="role-selection-container">
       <div className="role-selection-card">
         <div className="role-header">
-          <h1>Sistema Veterinaria</h1>
-          <h2>Inicio de sesión</h2>
+          <h1>COLITAS FELICES</h1>
+          <h2>Sistema veterinario</h2>
+          <img 
+            src="https://i.ibb.co/rG8YQzjQ/Logo-Veterinaria-Sin-Letras-Recorte.png" 
+            alt="Logo o decoración"
+            className="role-header-img"
+          />
         </div>
         
         <div className="role-content">
-          <h3>Iniciar sesión como:</h3>
+          <h3 className="textoEscritura">📌Seleccione cómo desea ingresar:</h3>
           
           <div className="role-buttons">
             <button 
@@ -46,7 +51,7 @@ const RoleSelection = () => {
         </div>
         
         <div className="role-info">
-          <p>De cada opción de usuario que se escoja, saldrá el panel de login</p>
+          <p>Tras elegir una opción de ingreso, será redirigido al login</p>
         </div>
       </div>
     </div>
