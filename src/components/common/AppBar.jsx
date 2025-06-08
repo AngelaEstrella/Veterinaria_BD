@@ -1,8 +1,9 @@
+// components/common/AppBar.jsx
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import '../../styles/AppBar.css';
 
-const AppBar = ({ title, subtitle, user }) => {
+const AppBar = ({ title, subtitle }) => {
   const { logout } = useAuth();
 
   const handleLogout = () => {
@@ -18,13 +19,9 @@ const AppBar = ({ title, subtitle, user }) => {
           <h1>{title}</h1>
           {subtitle && <h2>{subtitle}</h2>}
         </div>
-        <div className="app-bar-user">
-          <div className="user-info">
-            <span className="user-icon">👤</span>
-            <span className="user-name">Recepcionista</span>
-          </div>
-          <button onClick={handleLogout} className="logout-btn">
-            Cerrar Sesión
+        <div className="app-bar-actions">
+          <button onClick={handleLogout} className="cerrar-sesion-btn">
+            cerrar sesión
           </button>
         </div>
       </div>

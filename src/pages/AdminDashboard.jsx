@@ -69,7 +69,7 @@ const AdminDashboard = () => {
       <div className="main-content">
         <AppBar 
           title="Administrador"
-          user={user}
+
         />
         
         <div className="dashboard-content">

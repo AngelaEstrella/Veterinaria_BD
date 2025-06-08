@@ -61,7 +61,6 @@ const RecepcionistaDashboard = () => {
         <AppBar 
           title="BIENVENID@"
           subtitle="NOMBRE RECEPCIONISTA"
-          user={user}
         />
         
         <div className="dashboard-content">

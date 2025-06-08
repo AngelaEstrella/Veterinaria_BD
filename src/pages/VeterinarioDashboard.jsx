@@ -74,8 +74,7 @@ const VeterinarioDashboard = () => {
       
       <div className="main-content">
         <AppBar 
-          title="Pantalla Inicio Veterinario"
-          user={user}
+          title="Veterinario"
         />
         
         <div className="dashboard-content">
