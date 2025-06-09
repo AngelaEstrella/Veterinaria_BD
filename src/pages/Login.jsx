@@ -99,16 +99,18 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <div className="login-header">
-          <button 
+        <button 
             className="back-button"
             onClick={handleBackToRoles}
           >
-            ← Volver
+            Atrás
           </button>
-          <h1>Login</h1>
-          <h2>{getRoleTitle()}</h2>
+        <div className="login-header">
+          <h1 className="login-title">INICIO DE SESIÓN</h1>
+          <h2 className="login-role-title">{getRoleTitle()}</h2>
         </div>
+        
+        <div className="login-divider"></div>
         
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
@@ -119,21 +121,21 @@ const Login = () => {
               name="username"
               value={formData.username}
               onChange={handleChange}
-              placeholder="Placeholder"
+              placeholder="Ingrese su usuario"
               required
               disabled={loading}
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">contraseña</label>
+            <label htmlFor="password">Contraseña</label>
             <input
               type="password"
               id="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Placeholder"
+              placeholder="Ingrese su contraseña"
               required
               disabled={loading}
             />
