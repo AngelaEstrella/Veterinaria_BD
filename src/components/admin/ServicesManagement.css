@@ -1,0 +1,348 @@
+/* src/components/admin/ServicesManagement.css */
+
+.services-management {
+  padding: 20px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Header con filtros y botón agregar */
+.services-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tipo-filter {
+  background-color: #e0e0e0;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 150px;
+}
+
+.tipo-filter:focus {
+  outline: none;
+  background-color: #d0d0d0;
+}
+
+.additional-filters {
+  display: flex;
+  gap: 15px;
+}
+
+.additional-filters span {
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.additional-filters span:hover {
+  color: #333;
+}
+
+.btn-agregar {
+  background-color: #00bcd4;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-agregar:hover {
+  background-color: #00acc1;
+}
+
+.btn-agregar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Barra de búsqueda */
+.search-section {
+  margin-bottom: 20px;
+}
+
+.search-input-container {
+  position: relative;
+  max-width: 400px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 16px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 15px 12px 45px;
+  border: none;
+  border-radius: 25px;
+  background-color: #00bcd4;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: normal;
+}
+
+.search-input:focus {
+  outline: none;
+  background-color: #00acc1;
+}
+
+/* Loading indicator */
+.loading-indicator {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+/* Contenedor de tabla */
+.services-table-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* Estilos específicos para la tabla de servicios */
+.services-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.services-table th {
+  background-color: #f8f9fa;
+  color: #333;
+  font-weight: bold;
+  text-align: center;
+  padding: 15px 10px;
+  border-bottom: 2px solid #dee2e6;
+  font-size: 14px;
+}
+
+.services-table td {
+  padding: 15px 10px;
+  text-align: center;
+  border-bottom: 1px solid #dee2e6;
+  font-size: 14px;
+}
+
+.services-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* Acciones en la tabla */
+.services-table .actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  align-items: center;
+}
+
+.services-table .action-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  transition: transform 0.2s;
+}
+
+.services-table .action-button:hover {
+  transform: scale(1.2);
+}
+
+/* Modal específico para servicios */
+.service-modal .modal-content {
+  max-width: 500px;
+  width: 90%;
+}
+
+.service-modal .modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 15px 20px;
+}
+
+.service-modal .modal-title {
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+}
+
+.service-modal .modal-body {
+  padding: 20px;
+}
+
+/* Formulario de servicio */
+.service-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.service-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-form label {
+  font-weight: bold;
+  color: #333;
+  font-size: 14px;
+}
+
+.service-form .form-select,
+.service-form .form-input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.service-form .form-select:focus,
+.service-form .form-input:focus {
+  outline: none;
+  border-color: #00bcd4;
+  box-shadow: 0 0 0 2px rgba(0, 188, 212, 0.2);
+}
+
+.service-form .form-select:disabled,
+.service-form .form-input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Botón guardar */
+.btn-guardar {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  align-self: center;
+  transition: background-color 0.2s;
+}
+
+.btn-guardar:hover {
+  background-color: #5a6268;
+}
+
+.btn-guardar:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Error container */
+.error-container {
+  text-align: center;
+  padding: 40px 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.error-container h3 {
+  color: #dc3545;
+  margin-bottom: 10px;
+}
+
+.error-container p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.error-container button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.error-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .services-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .filter-section {
+    justify-content: space-between;
+  }
+  
+  .additional-filters {
+    flex-wrap: wrap;
+  }
+  
+  .search-input-container {
+    max-width: 100%;
+  }
+  
+  .services-table {
+    font-size: 12px;
+  }
+  
+  .services-table th,
+  .services-table td {
+    padding: 10px 5px;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.services-table tbody tr {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.loading-indicator {
+  animation: fadeIn 0.5s ease-in-out;
+}
