@@ -150,7 +150,7 @@ const MascotasManagement = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        console.log('Razas cargadas:', data); // Para debug
+        console.log('Razas cargadas:', data); 
         setRazas(data || []);
       } else {
         console.error('Error al cargar razas:', response.status);
@@ -328,7 +328,7 @@ const MascotasManagement = () => {
       errors.imagen = 'Debe ser una URL válida';
     }
 
-    // Validar que la raza corresponda al tipo de animal seleccionado
+    // Validar correspondencia de raza
     if (formData.tipo_animal && formData.id_raza) {
       const tipoAnimalObj = tiposAnimal.find(t => 
         t.descripcion === formData.tipo_animal && 
@@ -347,16 +347,12 @@ const MascotasManagement = () => {
   const isValidUrl = (string) => {
     try {
       const url = new URL(string);
-      // Verificar que sea HTTP o HTTPS
       if (!['http:', 'https:'].includes(url.protocol)) {
         return false;
       }
-      // Verificar que sea una imagen común
       const validExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
       const pathname = url.pathname.toLowerCase();
       const hasValidExtension = validExtensions.some(ext => pathname.includes(ext));
-      
-      // Permitir URLs de servicios de imágenes comunes aunque no tengan extensión
       const validImageHosts = ['i.ibb.co', 'imgur.com', 'i.imgur.com', 'images.unsplash.com', 'picsum.photos'];
       const isValidHost = validImageHosts.some(host => url.hostname.includes(host));
       
@@ -376,7 +372,7 @@ const MascotasManagement = () => {
     setLoading(true);
 
     try {
-      // Encontrar el tipo de animal seleccionado para obtener su id_tipo_animal
+      // Encontrar el tipo de animal seleccionado
       const tipoAnimalObj = tiposAnimal.find(t => 
         t.descripcion === formData.tipo_animal && 
         t.id_raza === parseInt(formData.id_raza)
@@ -388,7 +384,7 @@ const MascotasManagement = () => {
         return;
       }
 
-      // Primero intentar sin imagen si hay URL de imagen
+      // Intentar sin imagen si hay URL 
       let mascotaData = {
         nombre: formData.nombre.trim(),
         sexo: formData.sexo,
@@ -400,7 +396,7 @@ const MascotasManagement = () => {
         id_raza: parseInt(formData.id_raza)
       };
 
-      // Agregar campos adicionales que el backend podría necesitar
+      // Agregar campos adicionales
       console.log('Iniciando proceso de creación de mascota...');
 
       const url = modalType === 'add' 
@@ -411,7 +407,7 @@ const MascotasManagement = () => {
 
       console.log('URL:', url, 'Method:', method);
 
-      // Primera petición sin imagen
+      // Petición sin imagen
       console.log('Registrando mascota...');
 
       let response = await fetch(url, {
@@ -428,7 +424,6 @@ const MascotasManagement = () => {
       console.log('Estado de registro:', response.status === 201 ? 'Éxito' : 'Error');
 
       if (response.ok) {
-        // Si hay imagen y la mascota se creó/actualizó correctamente, intentar actualizar con imagen
         if (formData.imagen && formData.imagen.trim()) {
           try {
             console.log('Intentando agregar imagen...');
@@ -464,7 +459,7 @@ const MascotasManagement = () => {
           alert(`Mascota ${modalType === 'add' ? 'registrada' : 'actualizada'} exitosamente`);
         }
         setShowModal(false);
-        fetchMascotas(); // Recargar la lista
+        fetchMascotas(); 
       } else {
         console.error('Error del servidor');
         alert(`Error: ${responseData.detail || 'Error desconocido al procesar la solicitud'}`);
@@ -480,12 +475,11 @@ const MascotasManagement = () => {
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     
-    // Si cambia el tipo de animal, limpiar la raza seleccionada
     if (name === 'tipo_animal') {
       setFormData(prev => ({
         ...prev,
         [name]: value,
-        id_raza: '' // Limpiar raza cuando cambia el tipo
+        id_raza: '' 
       }));
     } else {
       setFormData(prev => ({
@@ -494,7 +488,6 @@ const MascotasManagement = () => {
       }));
     }
     
-    // Limpiar error cuando el usuario empiece a escribir
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -503,7 +496,7 @@ const MascotasManagement = () => {
     }
   };
 
-  // Función para obtener las razas filtradas por tipo de animal
+  // Función para obtener las razas filtradas
   const getRazasByTipo = () => {
     if (!formData.tipo_animal) return [];
     
@@ -589,7 +582,7 @@ const MascotasManagement = () => {
   return (
     <div className="mascotas-management">
       <div className="section-header">
-        <h2>SECCIÓN MASCOTAS</h2>
+        <h2>SECCIÓN MASCOTAS 🐶🐱</h2>
         <button onClick={handleAdd} className="btn-add" disabled={loading}>
           + Añadir Mascota
         </button>
