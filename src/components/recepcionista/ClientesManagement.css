@@ -650,3 +650,14 @@
   border-color: #e74c3c !important;
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2) !important;
 }
+
+.clientes-management table th {
+  background: #68c1da !important;
+  color: white !important;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

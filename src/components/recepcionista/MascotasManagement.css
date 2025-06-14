@@ -507,6 +507,17 @@
   background: #a8a8a8;
 }
 
+.mascotas-management table th {
+  background: #68c1da !important;
+  color: white !important;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 /* ---- RESPONSIVE DESIGN ---- */
 @media (max-width: 768px) {
   .section-header {
