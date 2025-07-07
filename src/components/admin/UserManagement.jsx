@@ -145,7 +145,8 @@ const UserManagement = () => {
       setLoading(true);
       setError(null);
 
-      let url = `${BASE_URL}/administradores/?page=${page}&per_page=10`;
+      // Agregar filtro para solo obtener administradores activos
+      let url = `${BASE_URL}/administradores/?page=${page}&per_page=10&activos_solo=true`;
       
       if (genero) {
         url += `&genero=${genero}`;
@@ -189,6 +190,8 @@ const UserManagement = () => {
         genero: admin.genero
       }));
 
+      
+      mappedUsers.sort((a, b) => a.id - b.id);
       setUsers(mappedUsers);
       setTotalRecords(data.total || 0);
       setTotalPages(data.total_pages || 1);
