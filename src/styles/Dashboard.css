@@ -479,30 +479,30 @@
 }
 
 .action-btn.edit {
-  background: #ff9800;
+  background: #ffa856;
   color: white;
 }
 
 .action-btn.edit:hover {
-  background: #f57c00;
+  background: #e2964f;
 }
 
 .action-btn.view {
-  background: #2196f3;
+  background: #59bfdb;
   color: white;
 }
 
 .action-btn.view:hover {
-  background: #1976d2;
+  background: #45abc7;
 }
 
 .action-btn.delete {
-  background: #f44336;
+  background: #e75f55;
   color: white;
 }
 
 .action-btn.delete:hover {
-  background: #d32f2f;
+  background: #c42e2e;
 }
 
 /* Status Badges */
