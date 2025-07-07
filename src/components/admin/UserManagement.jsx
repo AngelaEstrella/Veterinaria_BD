@@ -1,33 +1,469 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Table from '../common/Table';
 import Modal from '../common/Modal';
 
 const UserManagement = () => {
-  const [users, setUsers] = useState([
-    { id: 123, nombre: 'JUAN CARLOS', role: 'admin' }
-  ]);
-
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState('add');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGenero, setSelectedGenero] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
 
+  // Estados para el formulario
+  const [formData, setFormData] = useState({
+    dni: '',
+    nombre: '',
+    apellido_paterno: '',
+    apellido_materno: '',
+    telefono: '',
+    email: '',
+    genero: 'M',
+    contraseña: '',
+    username: ''
+  });
+
+  const [formErrors, setFormErrors] = useState({});
+
+  // URL base de tu backend
+  const BASE_URL = 'https://veterinariaclinicabackend-production.up.railway.app/api/v1';
+
+  // Función para generar username automático
+  const generateUsername = (nombre) => {
+    if (!nombre.trim()) return '';
+    const primerNombre = nombre.trim().split(' ')[0].toLowerCase();
+    return `admin_${primerNombre}`;
+  };
+
+  // Función para crear administrador
+  const createAdministrador = async (adminData) => {
+    try {
+      const response = await fetch(`${BASE_URL}/administradores/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(adminData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Administrador creado:', data);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error creando administrador:', error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Función para actualizar administrador
+  const updateAdministrador = async (adminId, adminData) => {
+    try {
+      const response = await fetch(`${BASE_URL}/administradores/${adminId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(adminData)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Administrador actualizado:', data);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error actualizando administrador:', error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Función para cambiar contraseña
+  const changePassword = async (adminId, newPassword) => {
+    try {
+      const response = await fetch(`${BASE_URL}/administradores/${adminId}/change-password`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          admin_id: adminId,
+          new_password: newPassword
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Contraseña cambiada:', data);
+      return { success: true, data };
+    } catch (error) {
+      console.error('Error cambiando contraseña:', error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Función para eliminar administrador
+  const deleteAdministrador = async (adminId) => {
+    try {
+      const response = await fetch(`${BASE_URL}/administradores/${adminId}?permanent=false`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Error: ${response.status}`);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error eliminando administrador:', error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Función para obtener administradores
+  const fetchAdministradores = async (page = 1, genero = '', search = '') => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let url = `${BASE_URL}/administradores/?page=${page}&per_page=10`;
+      
+      if (genero) {
+        url += `&genero=${genero}`;
+      }
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      let filteredData = data.administradores || [];
+      
+      // Filtrar por término de búsqueda localmente
+      if (search.trim()) {
+        filteredData = filteredData.filter(admin => 
+          admin.dni?.toString().includes(search) ||
+          admin.nombre?.toLowerCase().includes(search.toLowerCase()) ||
+          admin.apellido_paterno?.toLowerCase().includes(search.toLowerCase()) ||
+          admin.apellido_materno?.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      // Mapear los datos para que coincidan con la estructura esperada por Table
+      const mappedUsers = filteredData.map(admin => ({
+        id: admin.id_administrador,
+        dni: admin.dni || 'Sin DNI',
+        nombre: admin.nombre || 'Sin nombre',
+        apellido_paterno: admin.apellido_paterno || 'Sin apellido',
+        apellido_materno: admin.apellido_materno || 'Sin apellido',
+        telefono: admin.telefono || 'Sin teléfono',
+        email: admin.email || 'Sin email',
+        genero: admin.genero
+      }));
+
+      setUsers(mappedUsers);
+      setTotalRecords(data.total || 0);
+      setTotalPages(data.total_pages || 1);
+      setCurrentPage(page);
+
+    } catch (error) {
+      console.error('Error al obtener administradores:', error);
+      setError(error.message);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Efectos
+  useEffect(() => {
+    fetchAdministradores();
+  }, []);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchAdministradores(1, selectedGenero, searchTerm);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, selectedGenero]);
+
+  // Manejadores de eventos
   const handleAdd = () => {
+    setModalType('add');
+    setSelectedUser(null);
+    setFormData({
+      dni: '',
+      nombre: '',
+      apellido_paterno: '',
+      apellido_materno: '',
+      telefono: '',
+      email: '',
+      genero: 'M',
+      contraseña: '',
+      username: ''
+    });
+    setFormErrors({});
     setShowModal(true);
   };
 
   const handleEdit = (user) => {
-    console.log('Editar usuario:', user);
+    setModalType('edit');
+    setSelectedUser(user);
+    setFormData({
+      dni: user.dni === 'Sin DNI' ? '' : user.dni,
+      nombre: user.nombre === 'Sin nombre' ? '' : user.nombre,
+      apellido_paterno: user.apellido_paterno === 'Sin apellido' ? '' : user.apellido_paterno,
+      apellido_materno: user.apellido_materno === 'Sin apellido' ? '' : user.apellido_materno,
+      telefono: user.telefono === 'Sin teléfono' ? '' : user.telefono,
+      email: user.email === 'Sin email' ? '' : user.email,
+      genero: user.genero || 'M',
+      contraseña: '',
+      username: ''
+    });
+    setFormErrors({});
+    setShowModal(true);
   };
 
-  const handleDelete = (user) => {
-    if (window.confirm('¿Está seguro de eliminar este usuario?')) {
-      setUsers(prev => prev.filter(u => u.id !== user.id));
+  const handleDelete = async (user) => {
+    if (!window.confirm(`¿Está seguro de eliminar PERMANENTEMENTE el administrador "${user.nombre}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    setDeleteLoading(true);
+    
+    const result = await deleteAdministrador(user.id);
+    if (result.success) {
+      alert('Administrador eliminado permanentemente');
+      fetchAdministradores(currentPage, selectedGenero, searchTerm);
+    } else {
+      alert(`Error al eliminar: ${result.message}`);
+    }
+
+    setDeleteLoading(false);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
+    setSubmitLoading(true);
+    setFormErrors({});
+
+    try {
+      if (modalType === 'add') {
+        // Validaciones básicas
+        if (!formData.nombre.trim()) {
+          alert('El nombre es obligatorio');
+          return;
+        }
+
+        if (!formData.dni.trim() || !/^\d{8}$/.test(formData.dni.trim())) {
+          alert('El DNI debe tener 8 dígitos');
+          return;
+        }
+
+        if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email.trim())) {
+          alert('El email no tiene un formato válido');
+          return;
+        }
+
+        if (!formData.contraseña.trim() || formData.contraseña.length < 3) {
+          alert('La contraseña debe tener al menos 3 caracteres');
+          return;
+        }
+
+        // Crear nuevo administrador
+        const submitData = {
+          dni: formData.dni.trim(),
+          nombre: formData.nombre.trim(),
+          apellido_paterno: formData.apellido_paterno.trim(),
+          apellido_materno: formData.apellido_materno.trim() || null,
+          telefono: formData.telefono.trim(),
+          email: formData.email.trim(),
+          genero: formData.genero,
+          contraseña: formData.contraseña.trim(),
+          username: generateUsername(formData.nombre),
+          fecha_ingreso: new Date().toISOString().split('T')[0]
+        };
+
+        const result = await createAdministrador(submitData);
+        
+        if (result.success) {
+          setShowModal(false);
+          fetchAdministradores(currentPage, selectedGenero, searchTerm);
+          alert('Administrador creado exitosamente');
+        } else {
+          alert(`Error: ${result.message}`);
+        }
+      } else {
+        // Actualizar administrador existente
+        const updateData = {
+          dni: formData.dni.trim(),
+          nombre: formData.nombre.trim(),
+          apellido_paterno: formData.apellido_paterno.trim(),
+          apellido_materno: formData.apellido_materno.trim() || null,
+          telefono: formData.telefono.trim(),
+          email: formData.email.trim(),
+          genero: formData.genero
+        };
+
+        // Actualizar datos del perfil
+        const result = await updateAdministrador(selectedUser.id, updateData);
+        
+        if (!result.success) {
+          throw new Error(result.message);
+        }
+
+        // Si se proporcionó una nueva contraseña, cambiarla por separado
+        if (formData.contraseña.trim()) {
+          const passwordResult = await changePassword(selectedUser.id, formData.contraseña.trim());
+          if (!passwordResult.success) {
+            throw new Error(passwordResult.message);
+          }
+          alert('Administrador y contraseña actualizados exitosamente');
+        } else {
+          alert('Administrador actualizado exitosamente');
+        }
+
+        setShowModal(false);
+        fetchAdministradores(currentPage, selectedGenero, searchTerm);
+      }
+
+    } catch (error) {
+      console.error('Error en submit:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
+  const validateForm = () => {
+    const errors = {};
+    
+    if (!formData.dni.trim()) {
+      errors.dni = 'El DNI es requerido';
+    } else if (!/^\d{8}$/.test(formData.dni.trim())) {
+      errors.dni = 'El DNI debe tener 8 dígitos';
+    }
+    
+    if (!formData.nombre.trim()) {
+      errors.nombre = 'El nombre es requerido';
+    }
+    
+    if (!formData.apellido_paterno.trim()) {
+      errors.apellido_paterno = 'El apellido paterno es requerido';
+    }
+    
+    if (!formData.telefono.trim()) {
+      errors.telefono = 'El teléfono es requerido';
+    } else if (!/^\d{9}$/.test(formData.telefono.trim())) {
+      errors.telefono = 'El teléfono debe tener 9 dígitos';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'El email es requerido';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email.trim())) {
+      errors.email = 'El email no tiene un formato válido';
+    }
+    
+    if (modalType === 'add' && !formData.contraseña.trim()) {
+      errors.contraseña = 'La contraseña es requerida para nuevos usuarios';
+    } else if (formData.contraseña.trim() && formData.contraseña.length < 3) {
+      errors.contraseña = 'La contraseña debe tener al menos 3 caracteres';
+    }
+    
+    return errors;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: value
+      };
+      
+      // Auto-generar username cuando cambie el nombre (solo en modo agregar)
+      if (name === 'nombre' && modalType === 'add') {
+        newData.username = generateUsername(value);
+      }
+      
+      return newData;
+    });
+    
+    // Limpiar error del campo cuando el usuario empiece a escribir
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      fetchAdministradores(newPage, selectedGenero, searchTerm);
+    }
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedGenero('');
+    setCurrentPage(1);
+    fetchAdministradores(1, '', '');
+  };
+
+  // Configuración de columnas y acciones
   const columns = [
     { key: 'id', header: 'ID' },
+    { key: 'dni', header: 'DNI' },
     { key: 'nombre', header: 'NOMBRE' },
-    { key: 'role', header: 'ROL' }
+    { 
+      key: 'apellidos', 
+      header: 'APELLIDOS',
+      render: (user) => `${user.apellido_paterno} ${user.apellido_materno}`.trim()
+    },
+    { key: 'telefono', header: 'TELÉFONO' },
+    { key: 'email', header: 'EMAIL' },
+    { 
+      key: 'genero', 
+      header: 'GÉNERO',
+      render: (user) => user.genero === 'M' ? 'Masculino' : user.genero === 'F' ? 'Femenino' : 'N/A'
+    }
   ];
 
   const actions = [
@@ -35,44 +471,260 @@ const UserManagement = () => {
     { label: '🗑️', type: 'delete', onClick: handleDelete }
   ];
 
-  const filteredUsers = users.filter(user =>
-    user.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users;
+
+  if (loading && users.length === 0) {
+    return (
+      <div className="user-management">
+        <div className="loading-container">
+          <p>Cargando administradores...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-management">
       <div className="section-header">
-        <input
-          type="text"
-          placeholder="Nombre o código"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="search-input"
-        />
+        <div className="search-controls">
+          <input
+            type="text"
+            placeholder="Buscar por DNI, nombre o apellidos..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          
+          <select 
+            value={selectedGenero} 
+            onChange={(e) => setSelectedGenero(e.target.value)}
+            className="filter-select"
+          >
+            <option value="">Todos los géneros</option>
+            <option value="M">Masculino</option>
+            <option value="F">Femenino</option>
+          </select>
+
+          {(searchTerm || selectedGenero) && (
+            <button onClick={clearFilters} className="btn-clear">
+              Limpiar
+            </button>
+          )}
+        </div>
+        
         <button onClick={handleAdd} className="btn-add">
           AGREGAR
         </button>
       </div>
 
+      {/* Información de estado */}
+      <div className="status-info">
+        <span>Total: {totalRecords} registros</span>
+        <span>Página {currentPage} de {totalPages}</span>
+        <span>Mostrando: {users.length} registros</span>
+        {deleteLoading && <span style={{color: 'red'}}>Eliminando...</span>}
+      </div>
+
+      {error && (
+        <div className="error-message">
+          <p>Error: {error}</p>
+          <button onClick={() => fetchAdministradores()} className="btn-retry">
+            Reintentar
+          </button>
+        </div>
+      )}
+
       <Table 
         columns={columns}
         data={filteredUsers}
         actions={actions}
-        emptyMessage="No hay usuarios registrados"
+        emptyMessage={
+          searchTerm || selectedGenero 
+            ? "No se encontraron administradores con los filtros aplicados"
+            : "No hay administradores registrados"
+        }
       />
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <div className="pagination">
+          <button 
+            className="pagination-btn"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            ← Anterior
+          </button>
+          
+          <span className="pagination-info">
+            Página {currentPage} de {totalPages}
+          </span>
+          
+          <button 
+            className="pagination-btn"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            Siguiente →
+          </button>
+        </div>
+      )}
 
       <Modal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        title="Agregar Usuario"
-        size="medium"
+        title={modalType === 'add' ? 'AGREGAR' : 'EDITAR ADMINISTRADOR'}
+        size="large"
       >
-        <div className="modal-form">
-          <p>Formulario para agregar usuario aquí...</p>
-          <button onClick={() => setShowModal(false)} className="btn-submit">
-            Cerrar
-          </button>
-        </div>
+        <form onSubmit={handleSubmit} className="modal-form">
+          <div className="form-section">
+            <h3>DATOS PERSONALES</h3>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="dni">DNI (*)</label>
+                <input
+                  type="text"
+                  id="dni"
+                  name="dni"
+                  value={formData.dni}
+                  onChange={handleInputChange}
+                  placeholder="DNI..."
+                  maxLength="8"
+                  className={formErrors.dni ? 'error' : ''}
+                  disabled={modalType === 'edit'}
+                />
+                {formErrors.dni && <span className="error-message">{formErrors.dni}</span>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="nombre">NOMBRES (*)</label>
+                <input
+                  type="text"
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleInputChange}
+                  placeholder="NOMBRES..."
+                  className={formErrors.nombre ? 'error' : ''}
+                />
+                {formErrors.nombre && <span className="error-message">{formErrors.nombre}</span>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="genero">Género (*)</label>
+                <select
+                  id="genero"
+                  name="genero"
+                  value={formData.genero}
+                  onChange={handleInputChange}
+                  className={formErrors.genero ? 'error' : ''}
+                >
+                  <option value="M">M</option>
+                  <option value="F">F</option>
+                </select>
+                {formErrors.genero && <span className="error-message">{formErrors.genero}</span>}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="apellido_paterno">APELLIDO PATERNO (*)</label>
+                <input
+                  type="text"
+                  id="apellido_paterno"
+                  name="apellido_paterno"
+                  value={formData.apellido_paterno}
+                  onChange={handleInputChange}
+                  placeholder="APELLIDOS..."
+                  className={formErrors.apellido_paterno ? 'error' : ''}
+                />
+                {formErrors.apellido_paterno && <span className="error-message">{formErrors.apellido_paterno}</span>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="apellido_materno">APELLIDO MATERNO (*)</label>
+                <input
+                  type="text"
+                  id="apellido_materno"
+                  name="apellido_materno"
+                  value={formData.apellido_materno}
+                  onChange={handleInputChange}
+                  placeholder="APELLIDOS..."
+                  className={formErrors.apellido_materno ? 'error' : ''}
+                />
+                {formErrors.apellido_materno && <span className="error-message">{formErrors.apellido_materno}</span>}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="telefono">TELÉFONO (*)</label>
+                <input
+                  type="text"
+                  id="telefono"
+                  name="telefono"
+                  value={formData.telefono}
+                  onChange={handleInputChange}
+                  placeholder="999999999"
+                  maxLength="9"
+                  className={formErrors.telefono ? 'error' : ''}
+                />
+                {formErrors.telefono && <span className="error-message">{formErrors.telefono}</span>}
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="email">EMAIL (*)</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  placeholder="EXAMPLE@GMAIL.COM"
+                  className={formErrors.email ? 'error' : ''}
+                />
+                {formErrors.email && <span className="error-message">{formErrors.email}</span>}
+              </div>
+            </div>
+            
+            <div className="form-row">
+              <div className="form-group full-width">
+                <label htmlFor="contraseña">
+                  CONTRASEÑA {modalType === 'add' ? '(*)' : '(Dejar vacío para mantener actual)'}
+                </label>
+                <input
+                  type="password"
+                  id="contraseña"
+                  name="contraseña"
+                  value={formData.contraseña}
+                  onChange={handleInputChange}
+                  placeholder="CONTRASEÑA"
+                  className={formErrors.contraseña ? 'error' : ''}
+                />
+                {formErrors.contraseña && <span className="error-message">{formErrors.contraseña}</span>}
+              </div>
+            </div>
+          </div>
+          
+          <div className="form-actions">
+            <button 
+              type="button" 
+              onClick={() => setShowModal(false)}
+              className="btn-cancel"
+              disabled={submitLoading}
+            >
+              CANCELAR
+            </button>
+            <button 
+              type="submit"
+              className="btn-submit"
+              disabled={submitLoading}
+            >
+              {submitLoading ? 'PROCESANDO...' : 'GUARDAR'}
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   );
