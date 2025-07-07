@@ -12,6 +12,16 @@ const VeterinarioDashboard = () => {
   const { user } = useAuth();
   const [activeView, setActiveView] = useState('inicio');
 
+  const getUserDisplayName = () => {
+    if (user?.name && user.name !== user?.username) {
+      return user.name;
+    }
+    if (user?.session_info?.nombre_completo) {
+      return user.session_info.nombre_completo;
+    }
+    return user?.username || 'VETERINARIO';
+  };
+
   const sidebarItems = [
     { id: 'inicio', label: 'Inicio', icon: '🏠' },
     { id: 'solicitudes', label: 'Solicitudes de atención', icon: '📋' },
@@ -74,7 +84,8 @@ const VeterinarioDashboard = () => {
       
       <div className="main-content">
         <AppBar 
-          title="Veterinario"
+          title="🟢 Cuenta de:"
+          subtitle={getUserDisplayName()}
         />
         
         <div className="dashboard-content">

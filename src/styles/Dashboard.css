@@ -154,12 +154,12 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   border-left: 4px solid #64b5f6;
 }
-
+/*
 .stat-card h3 {
   color: #333;
   margin-bottom: 1rem;
   font-size: 1.1rem;
-}
+}*/
 
 .attention-tabs {
   display: flex;
@@ -218,21 +218,23 @@
   align-items: center;
 }
 
+/*
 .welcome-text h2 {
   color: #64b5f6;
   font-size: 1.8rem;
   margin-bottom: 0.25rem;
-}
-
+} */
+/*
 .welcome-text h3 {
   color: #333;
   font-size: 1.3rem;
   margin-bottom: 0.5rem;
 }
-
+*/
+/*
 .welcome-text p {
   color: #666;
-}
+}*/
 
 .welcome-image .vet-icon {
   font-size: 4rem;
@@ -259,19 +261,19 @@
 }
 
 .stat-card.stat-blue {
-  border-left: 4px solid #64b5f6;
+  border-left: 4px solid #54b7d3;
 }
 
 .stat-card.stat-green {
-  border-left: 4px solid #4caf50;
+  border-left: 4px solid #499ac0;
 }
 
 .stat-card.stat-purple {
-  border-left: 4px solid #9c27b0;
+  border-left: 4px solid #3b7ba0;
 }
 
 .stat-card.stat-orange {
-  border-left: 4px solid #ff9800;
+  border-left: 4px solid #5abbe2;
 }
 
 .stat-content {
@@ -285,24 +287,24 @@
   align-items: center;
   margin-bottom: 1rem;
 }
-
+/*
 .stat-header h3 {
   color: #666;
   font-size: 0.9rem;
   font-weight: 500;
   margin: 0;
 }
-
+*/
 .stat-icon {
   font-size: 1.5rem;
 }
-
+/*
 .stat-value {
   font-size: 2.5rem;
   font-weight: bold;
   color: #333;
 }
-
+*/
 /* Section Headers */
 .section-header {
   display: flex;

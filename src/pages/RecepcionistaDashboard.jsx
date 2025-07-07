@@ -17,6 +17,17 @@ const RecepcionistaDashboard = () => {
   const { user } = useAuth();
   const [activeView, setActiveView] = useState('inicio');
 
+  // Función para obtener el nombre del usuario logueado
+  const getUserDisplayName = () => {
+    if (user?.name && user.name !== user?.username) {
+      return user.name;
+    }
+    if (user?.session_info?.nombre_completo) {
+      return user.session_info.nombre_completo;
+    }
+    return user?.username || 'RECEPCIONISTA';
+  };
+
   const sidebarItems = [
     { id: 'inicio', label: 'Inicio', icon: '🏠' },
     { id: 'clientes', label: 'Clientes', icon: '👥' },
@@ -59,8 +70,8 @@ const RecepcionistaDashboard = () => {
       
       <div className="main-content">
         <AppBar 
-          title="BIENVENID@"
-          subtitle="NOMBRE RECEPCIONISTA"
+          title="🟢 Cuenta de:"
+          subtitle={getUserDisplayName()}
         />
         
         <div className="dashboard-content">

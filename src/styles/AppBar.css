@@ -1,6 +1,6 @@
 /* styles/AppBar.css */
 .app-bar {
-  background: #64b5f6;
+  background: #7fd1e7;
   color: white;
   padding: 1rem 2rem;
   display: flex;
@@ -21,21 +21,27 @@
   flex: 1;
 }
 
+
 .app-bar-titles h1 {
-  color: white;
-  font-size: 1.5rem;
+  color: rgb(48, 48, 48);
+  font-size: 1.4rem;
   margin: 0;
-  font-weight: 600;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  font-weight: bold;
 }
 
 .app-bar-titles h2 {
-  color: rgba(255,255,255,0.9);
-  font-size: 1rem;
-  font-weight: normal;
+  color: white;
+  font-size: 1.9rem;
+  font-weight: bold;
   margin: 0;
   margin-top: 0.25rem;
   opacity: 0.8;
+  text-shadow:
+    -1px -1px 0 #000d11,
+     1px -1px 0 #000d11,
+    -1px  1px 0 #000d11,
+     1px  1px 0 #000d11;
+  text-transform: uppercase;
 }
 
 .app-bar-actions {
@@ -44,21 +50,27 @@
 }
 
 .cerrar-sesion-btn {
-  background: rgba(255,255,255,0.2);
+  background: linear-gradient(135deg, #5ec1dd, #47b3d1);
   color: white;
-  border: 1px solid rgba(255,255,255,0.3);
-  padding: 0.5rem 1rem;
+  padding: 0.7rem 1.4rem;
+  border: 2px solid transparent;
   border-radius: 5px;
+  border-color: #32859c;
+  border-width: 2.5px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-weight: 500;
+  transition: all 0.4s ease;
+  font-weight: bold;
   font-size: 0.9rem;
   text-transform: lowercase;
   letter-spacing: 0.3px;
+  font-size: 1.0rem;
+  text-transform: uppercase;
 }
 
 .cerrar-sesion-btn:hover {
-  background: rgba(255,255,255,0.3);
+  background: #c94944;
+  border: 2px solid transparent;
+  border-color: #802421;
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }

@@ -13,6 +13,16 @@ const AdminDashboard = () => {
   const { user } = useAuth();
   const [activeView, setActiveView] = useState('inicio');
 
+  const getUserDisplayName = () => {
+    if (user?.name && user.name !== user?.username) {
+      return user.name;
+    }
+    if (user?.session_info?.nombre_completo) {
+      return user.session_info.nombre_completo;
+    }
+    return user?.username || 'RECEPCIONISTA';
+  };
+
   const sidebarItems = [
     { id: 'inicio', label: 'Inicio', icon: '🏠' },
     { id: 'usuarios', label: 'Usuarios', icon: '👥' },
@@ -68,8 +78,8 @@ const AdminDashboard = () => {
       
       <div className="main-content">
         <AppBar 
-          title="Administrador"
-
+          title="🟢 Cuenta de:"
+          subtitle={getUserDisplayName()}
         />
         
         <div className="dashboard-content">
