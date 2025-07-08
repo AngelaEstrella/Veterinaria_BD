@@ -240,7 +240,9 @@ const ModificarDiagnostico = ({ diagnosticoId, onSave, onCancel }) => {
               onChange={handleChange}
             >
               <option value="Activa">Activa</option>
-              <option value="Inactiva">Inactiva</option>
+              <option value="Controlada">Controlada</option>
+              <option value="Curada">Curada</option>
+              <option value="En seguimiento">En seguimiento</option>
             </select>
           </div>
           

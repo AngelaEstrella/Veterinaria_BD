@@ -11,7 +11,7 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ FUNCIÓN MEJORADA para cargar resultado
+  // Cargar resultado de servicio si existe
   const fetchResultadoServicio = async (citaId) => {
     try {
       console.log('Cargando resultado para cita ID:', citaId);
@@ -21,7 +21,6 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
       );
       
       if (!response.ok) {
-        // Si es 404, no hay resultado previo (normal para nuevas citas)
         if (response.status === 404) {
           console.log('No hay resultado previo, usando valores por defecto');
           setFormData({
@@ -32,8 +31,6 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
           });
           return;
         }
-        
-        // Para otros errores, obtener el mensaje
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.detail || `Error HTTP ${response.status}`);
       }
@@ -60,8 +57,8 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
   useEffect(() => {
     console.log('Cita recibida:', cita);
     
-    if (cita && cita.id_cita) {
-      fetchResultadoServicio(cita.id_cita);
+    if (cita && cita.id) {
+      fetchResultadoServicio(cita.id);
     } else {
       console.error('Cita inválida:', cita);
       setError('No se recibió una cita válida');
@@ -83,16 +80,14 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
     });
   };
 
-  // ✅ FUNCIÓN SUBMIT SOLO PARA PUT (ACTUALIZAR)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!cita || !cita.id_cita) {
+    if (!cita || !cita.id) {
       setError('No se puede guardar: ID de cita no válido');
       return;
     }
 
-    // Validar datos requeridos
     if (!formData.resultado.trim()) {
       setError('El resultado es requerido');
       return;
@@ -103,30 +98,23 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
       return;
     }
     
-    // ✅ FORMATO CORRECTO: Incluir TODOS los campos que espera el backend
     const updatedData = {
-      id_cita: cita.id_cita,  // ← AGREGADO: El backend lo necesita
-      id_veterinario: cita.id_veterinario || 4,  // ← AGREGADO: El backend lo necesita (fallback a 4)
+      id_cita: cita.id,
+      id_veterinario: cita.id_veterinario || 4, // fallback
       resultado: formData.resultado.trim(),
       interpretacion: formData.interpretacion.trim() || null,
       archivo_adjunto: formData.archivoAdjunto || null,
       fecha_realizacion: `${formData.fechaRealizacion}T00:00:00`
     };
 
-    console.log('=== DATOS A ENVIAR (PUT) ===');
-    console.log('Cita completa:', cita);
-    console.log('Cita ID:', cita.id_cita);
-    console.log('Veterinario ID:', cita.id_veterinario);
-    console.log('Datos a enviar:', updatedData);
-    console.log('URL:', `resultado_servicio/${cita.id_cita}`);
+    console.log('=== DATOS A ENVIAR (PUT) ===', updatedData);
 
     try {
       setLoading(true);
       setError(null);
       
-      // ✅ SOLO PUT - NO FALLBACK A POST
       const response = await fetch(
-        `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/resultado_servicio/${cita.id_cita}`,
+        `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/resultado_servicio/${cita.id}`,
         {
           method: 'PUT',
           headers: {
@@ -136,42 +124,20 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
         }
       );
 
-      console.log('Response status:', response.status);
-      console.log('Response ok:', response.ok);
-
       if (!response.ok) {
-        // ✅ MEJOR MANEJO DE ERRORES DEL BACKEND
         let errorMessage = `Error HTTP ${response.status}`;
-        
         try {
           const errorData = await response.json();
-          console.log('Error data from backend:', errorData);
-          
           if (errorData.detail) {
-            // Si detail es un string
             if (typeof errorData.detail === 'string') {
               errorMessage = errorData.detail;
-            }
-            // Si detail es un array de errores de validación
-            else if (Array.isArray(errorData.detail)) {
-              const errors = errorData.detail.map(err => {
-                if (typeof err === 'object' && err.msg) {
-                  return `${err.loc ? err.loc.join('.') + ': ' : ''}${err.msg}`;
-                }
-                return String(err);
-              });
-              errorMessage = errors.join(', ');
-            }
-            // Si detail es un objeto
-            else if (typeof errorData.detail === 'object') {
-              errorMessage = JSON.stringify(errorData.detail);
+            } else if (Array.isArray(errorData.detail)) {
+              errorMessage = errorData.detail.map(e => e.msg).join(', ');
             }
           }
-        } catch (parseError) {
-          console.error('Error parsing response:', parseError);
+        } catch {
           errorMessage = `Error ${response.status}: ${response.statusText}`;
         }
-        
         throw new Error(errorMessage);
       }
 
@@ -182,9 +148,7 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
       onComplete();
       
     } catch (err) {
-      console.error('❌ Error completo:', err);
-      console.error('❌ Error message:', err.message);
-      
+      console.error('Error al guardar:', err);
       setError(err.message || 'Error desconocido al guardar');
     } finally {
       setLoading(false);
@@ -208,7 +172,7 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
             onClick={() => {
               setError(null);
               setLoading(true);
-              fetchResultadoServicio(cita.id_cita);
+              fetchResultadoServicio(cita.id);
             }}
             className="btn-retry"
           >
@@ -222,7 +186,7 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
           <h3>Datos de la Cita</h3>
           
           <div className="cita-info">
-            <p><strong>ID Cita:</strong> {cita.id_cita}</p>
+            <p><strong>ID Cita:</strong> {cita.id}</p>
             <p><strong>Mascota:</strong> {cita.mascota}</p>
             <p><strong>Servicio:</strong> {cita.servicio}</p>
             <p><strong>Fecha:</strong> {cita.fecha}</p>
@@ -244,7 +208,7 @@ const AtenderCita = ({ cita, onComplete, onCancel }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Fecha realización: *</label>
+              <label>Fecha realización *</label>
               <input
                 type="date"
                 name="fechaRealizacion"

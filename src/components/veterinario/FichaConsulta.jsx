@@ -36,7 +36,7 @@ const FichaConsulta = ({ solicitud, onComplete, onCancel }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`https://veterinariaclinicabackend-production.up.railway.app/api/v1/triaje/${solicitud.id}`);
+      const response = await fetch(`https://veterinariaclinicabackend-production.up.railway.app/api/v1/triaje/consulta/${solicitud.id}`);
       
       if (response.ok) {
         const triageResult = await response.json();

@@ -32,7 +32,7 @@ const FichaTriaje = ({ solicitud, onComplete, onCancel }) => {
       setLoading(true);
       // Usando el ID de la solicitud como triaje_id
       // Si tienes una relación diferente, ajusta según tu modelo de datos
-      const response = await fetch(`https://veterinariaclinicabackend-production.up.railway.app/api/v1/triaje/${solicitud.id}`);
+      const response = await fetch(`https://veterinariaclinicabackend-production.up.railway.app/api/v1/triaje/consulta/${solicitud.id}`);
       
       if (response.ok) {
         const data = await response.json();

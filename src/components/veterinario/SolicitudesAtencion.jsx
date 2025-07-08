@@ -182,33 +182,40 @@ const SolicitudesAtencion = () => {
 
   // Función modificada para manejar la atención
   const handleAtender = async (solicitud) => {
-    console.log('🎯 Iniciando proceso de atención para solicitud:', solicitud.id);
-    
-    if (!user || !user.id) {
-      console.error('❌ No se pudo obtener la información del usuario');
-      alert('Error: No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.');
-      return;
-    }
+  console.log('🎯 Iniciando proceso de atención para solicitud:', solicitud.id);
 
-    try {
-      setProcesandoAtencion(true);
-      console.log('⏳ Procesando atención...');
-      
-      // Primero actualizar la disposición del veterinario a "Ocupado"
-      await updateVeterinarioDisposicion(user.id);
-      
-      // Si todo sale bien, proceder con el triaje
-      console.log('✅ Abriendo modal de triaje...');
-      setSelectedSolicitud(solicitud);
-      setShowTriaje(true);
-      
-    } catch (error) {
-      console.error('❌ Error en handleAtender:', error);
-      alert(`Error al iniciar la atención: ${error.message}`);
-    } finally {
-      setProcesandoAtencion(false);
-    }
-  };
+  // Extraer el id_consulta si existe
+  if (solicitud._original && solicitud._original.id_consulta) {
+    console.log('📝 Esta solicitud tiene consulta_id:', solicitud._original.id_consulta);
+  } else {
+    console.log('📝 Esta solicitud NO tiene un consulta_id asociado.');
+  }
+
+  if (!user || !user.id) {
+    console.error('❌ No se pudo obtener la información del usuario');
+    alert('Error: No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.');
+    return;
+  }
+
+  try {
+    setProcesandoAtencion(true);
+    console.log('⏳ Procesando atención...');
+
+    // Primero actualizar la disposición del veterinario a "Ocupado"
+    await updateVeterinarioDisposicion(user.id);
+
+    // Si todo sale bien, proceder con el triaje
+    console.log('✅ Abriendo modal de triaje...');
+    setSelectedSolicitud(solicitud);
+    setShowTriaje(true);
+
+  } catch (error) {
+    console.error('❌ Error en handleAtender:', error);
+    alert(`Error al iniciar la atención: ${error.message}`);
+  } finally {
+    setProcesandoAtencion(false);
+  }
+};
 
   const handleTriajeComplete = () => {
     setShowTriaje(false);

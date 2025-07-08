@@ -1,55 +1,57 @@
-// CitasProgramadas.jsx - CORREGIDO
 import React, { useState, useEffect } from 'react';
 import Table from '../common/Table';
 import Modal from '../common/Modal';
 import AtenderCita from './AtenderCita';
+import { useAuth } from "../../context/AuthContext";
 
 const CitasProgramadas = () => {
+  const { user } = useAuth();
   const [citas, setCitas] = useState([]);
   const [selectedCita, setSelectedCita] = useState(null);
   const [showAtender, setShowAtender] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Función para cargar las citas
   const fetchCitas = async () => {
     try {
       setLoading(true);
+
+      // ✅ Aquí llamas a tu endpoint nuevo
       const response = await fetch(
-        'https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/cita'
+        `https://veterinariaclinicabackend-production.up.railway.app/api/v1/veterinarios/resultados-citas/${user.id}`
       );
       if (!response.ok) {
         throw new Error('Error al cargar citas');
       }
       const data = await response.json();
 
-      // Para cada cita, obtener el servicio, veterinario y mascota
-      const citasConServicioVeterinarioYMascota = await Promise.all(
-        data.map(async (cita) => {
-          // Obtener el servicio
-          const servicioResponse = await fetch(
-            `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/citaServicio/${cita.id_cita}`
-          );
-          const servicioData = await servicioResponse.json();
+      // ✅ Para cada resultado, pedir info adicional de la cita
+      const citasConDatos = await Promise.all(
+        data.map(async (item) => {
+          const cita = item.cita || {};
+          const fechaObj = new Date(cita.fecha_hora_programada);
 
-          // Obtener el veterinario
-          const veterinarioResponse = await fetch(
-            `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/citaVeterinario/${cita.id_cita}`
-          );
-          const veterinarioData = await veterinarioResponse.json();
-
-          // Obtener la mascota
-          const mascotaResponse = await fetch(
+          // Fetch mascota
+          const mascotaRes = await fetch(
             `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/citaMascota/${cita.id_cita}`
           );
-          const mascotaData = await mascotaResponse.json();
+          const mascotaData = await mascotaRes.json();
 
-          const fechaObj = new Date(cita.fecha_hora_programada);
-          
-          // ✅ CAMBIO PRINCIPAL: Mantener TODA la información de la cita original
+          // Fetch servicio
+          const servicioRes = await fetch(
+            `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/citaServicio/${cita.id_cita}`
+          );
+          const servicioData = await servicioRes.json();
+
+          // Fetch veterinario
+          const veterinarioRes = await fetch(
+            `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/citaVeterinario/${cita.id_cita}`
+          );
+          const veterinarioData = await veterinarioRes.json();
+
           return {
-            ...cita, // ← Mantener todos los datos originales incluyendo id_cita
-            id: cita.id_cita, // ← Para compatibilidad con la tabla
+            id: cita.id_cita,
+            id_cita: cita.id_cita, // 👈 ESTE CAMPO
             mascota: mascotaData.nombre_mascota || 'Mascota no encontrada',
             servicio: servicioData.nombre_servicio || 'Servicio no encontrado',
             veterinario: veterinarioData.veterinario || 'Veterinario no encontrado',
@@ -60,7 +62,7 @@ const CitasProgramadas = () => {
         })
       );
 
-      setCitas(citasConServicioVeterinarioYMascota);
+      setCitas(citasConDatos);
     } catch (err) {
       console.error(err);
       setError(err.message);
@@ -70,20 +72,17 @@ const CitasProgramadas = () => {
   };
 
   useEffect(() => {
-    fetchCitas();
-  }, []);
-  
-  // ✅ FUNCIÓN MEJORADA para manejar atender
+    if (user?.id) {
+      fetchCitas();
+    }
+  }, [user]);
+
   const handleAtender = (cita) => {
-    console.log('Cita completa recibida:', cita); // Para debug
-    console.log('ID de la cita:', cita.id_cita); // Para debug
-    
-    if (cita && cita.id_cita) {
-      setSelectedCita(cita); // Pasar toda la cita con id_cita
+    if (cita?.id) {
+      setSelectedCita(cita);
       setShowAtender(true);
     } else {
-      console.error('No se pudo obtener la ID de la cita', cita);
-      alert('Error: No se puede acceder a los datos de la cita');
+      alert('No se puede atender la cita seleccionada.');
     }
   };
 
@@ -91,7 +90,7 @@ const CitasProgramadas = () => {
     setShowAtender(false);
     setCitas((prev) =>
       prev.map((c) =>
-        c.id_cita === selectedCita.id_cita ? { ...c, estado: 'Atendida' } : c
+        c.id === selectedCita.id ? { ...c, estado: 'Atendida' } : c
       )
     );
     setSelectedCita(null);
@@ -118,7 +117,7 @@ const CitasProgramadas = () => {
     {
       label: 'Atender',
       type: 'primary',
-      onClick: handleAtender // Esta función recibe la fila completa
+      onClick: handleAtender
     }
   ];
 
@@ -138,14 +137,14 @@ const CitasProgramadas = () => {
   return (
     <div className="citas-programadas">
       <div className="section-header">
-        <h2>Citas Programadas - Hoy</h2>
+        <h2>Citas Programadas</h2>
       </div>
 
       <Table
         columns={columns}
         data={citas}
         actions={actions}
-        emptyMessage="No hay citas programadas para hoy"
+        emptyMessage="No hay citas programadas"
       />
 
       <Modal
@@ -155,7 +154,7 @@ const CitasProgramadas = () => {
         size="large"
       >
         <AtenderCita
-          cita={selectedCita} // ← Ahora contiene id_cita
+          cita={selectedCita}
           onComplete={handleAtenderComplete}
           onCancel={() => setShowAtender(false)}
         />
