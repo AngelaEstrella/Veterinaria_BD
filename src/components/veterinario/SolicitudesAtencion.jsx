@@ -75,48 +75,53 @@ const SolicitudesAtencion = () => {
 
   // Función para obtener datos de la API
   const fetchSolicitudes = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('https://veterinariaclinicabackend-production.up.railway.app/api/v1/solicitudes/');
-      
-      if (!response.ok) {
-        throw new Error('Error al obtener las solicitudes');
+      try {
+        if (!user || !user.id) {
+          throw new Error('Usuario no autenticado. Por favor inicie sesión.');
+        }
+
+        setLoading(true);
+
+        const response = await fetch(
+          `https://veterinariaclinicabackend-production.up.railway.app/api/v1/solicitudes/veterinario/${user.id}`
+        );
+
+        if (!response.ok) {
+          throw new Error('Error al obtener las solicitudes');
+        }
+
+        const data = await response.json();
+
+        // Obtener datos de mascotas y clientes para cada solicitud
+        const solicitudesConDatos = await Promise.all(
+          data.map(async (solicitud) => {
+            const mascota = await fetchMascota(solicitud.id_mascota);
+            const cliente = mascota ? await fetchCliente(mascota.id_cliente || solicitud.id_mascota) : null;
+
+            return {
+              id: solicitud.id_solicitud,
+              mascota: mascota ? mascota.nombre : `Mascota ${solicitud.id_mascota}`,
+              cliente: cliente ? `${cliente.nombre} ${cliente.apellido_paterno} ${cliente.apellido_materno}` : `Cliente ${solicitud.id_mascota}`,
+              fecha: formatearFecha(solicitud.fecha_hora_solicitud),
+              hora: formatearHora(solicitud.fecha_hora_solicitud),
+              estado: mapearEstado(solicitud.estado),
+              urgencia: mapearUrgencia(solicitud.tipo_solicitud),
+              _original: solicitud,
+              _mascota: mascota,
+              _cliente: cliente
+            };
+          })
+        );
+
+        setSolicitudes(solicitudesConDatos);
+      } catch (error) {
+        setError(error.message);
+        console.error('Error al cargar solicitudes:', error);
+      } finally {
+        setLoading(false);
       }
-      
-      const data = await response.json();
-      
-      // Obtener datos de mascotas y clientes para cada solicitud
-      const solicitudesConDatos = await Promise.all(
-        data.map(async (solicitud) => {
-          const mascota = await fetchMascota(solicitud.id_mascota);
-          // Asumiendo que el cliente_id está relacionado con la mascota
-          // Si tienes una relación directa en la solicitud, ajusta según tu modelo
-          const cliente = mascota ? await fetchCliente(mascota.id_cliente || solicitud.id_mascota) : null;
-          
-          return {
-            id: solicitud.id_solicitud,
-            mascota: mascota ? mascota.nombre : `Mascota ${solicitud.id_mascota}`,
-            cliente: cliente ? `${cliente.nombre} ${cliente.apellido_paterno} ${cliente.apellido_materno}` : `Cliente ${solicitud.id_mascota}`,
-            fecha: formatearFecha(solicitud.fecha_hora_solicitud),
-            hora: formatearHora(solicitud.fecha_hora_solicitud),
-            estado: mapearEstado(solicitud.estado),
-            urgencia: mapearUrgencia(solicitud.tipo_solicitud),
-            // Mantener datos originales para referencia
-            _original: solicitud,
-            _mascota: mascota,
-            _cliente: cliente
-          };
-        })
-      );
-      
-      setSolicitudes(solicitudesConDatos);
-    } catch (error) {
-      setError(error.message);
-      console.error('Error al cargar solicitudes:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
 
   // Función para formatear la fecha
   const formatearFecha = (fechaISO) => {

@@ -3,8 +3,11 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ModificarDiagnostico from './ModificarDiagnostico';
 import ModificarServicio from './ModificarServicio';
+import { useAuth } from '../../context/AuthContext';
+
 
 const FichaConsulta = ({ solicitud, onComplete, onCancel }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     motivoConsulta: '',
     diagnosticoPreliminar: '',
@@ -116,66 +119,98 @@ const FichaConsulta = ({ solicitud, onComplete, onCancel }) => {
       [name]: type === 'checkbox' ? checked : value
     });
   };
+  
+  const actualizarDisposicion = async () => {
+      try {
+        const response = await fetch(
+          `https://veterinariaclinicabackend-production.up.railway.app/api/v1/veterinarios/veterinario/usuario/${user.id}/disposicionLibre`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          }
+        );
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
 
-    if (!formData.motivoConsulta.trim()) {
-      alert('El motivo de la consulta es obligatorio');
-      return;
-    }
-    if (!formData.tipoConsulta.trim()) {
-      alert('El tipo de consulta es obligatorio');
-      return;
-    }
-    if (formData.condicionGeneral === 'Select') {
-      alert('Debe seleccionar una condición general');
-      return;
-    }
-
-    const payload = {
-      tipo_consulta: formData.tipoConsulta,
-      motivo_consulta: formData.motivoConsulta,
-      sintomas_observados: formData.sintomasObservados,
-      diagnostico_preliminar: formData.diagnosticoPreliminar,
-      observaciones: formData.observaciones,
-      condicion_general: formData.condicionGeneral,
-      es_seguimiento: formData.esSeguimiento
+        const result = await response.json();
+        console.log('Disposición actualizada:', result);
+      } catch (error) {
+        console.error('Error al actualizar disposición:', error);
+        alert(`Error al actualizar disposición del veterinario: ${error.message}`);
+      }
     };
 
-    console.log('Datos de consulta preparados para enviar:', payload);
 
-    try {
-      let response;
+  const handleSubmit = async (e) => {
+      e.preventDefault();
 
-      if (consultaData) {
-        // Si existe, ACTUALIZAR
-        const url = `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/${consultaData.id_consulta}`;
-        response = await fetch(url, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        alert('La creación de nuevas consultas aún no está implementada.');
+      if (!formData.motivoConsulta.trim()) {
+        alert('El motivo de la consulta es obligatorio');
+        return;
+      }
+      if (!formData.tipoConsulta.trim()) {
+        alert('El tipo de consulta es obligatorio');
+        return;
+      }
+      if (formData.condicionGeneral === 'Select') {
+        alert('Debe seleccionar una condición general');
         return;
       }
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error ${response.status}: ${errorText}`);
+      const payload = {
+        tipo_consulta: formData.tipoConsulta,
+        motivo_consulta: formData.motivoConsulta,
+        sintomas_observados: formData.sintomasObservados,
+        diagnostico_preliminar: formData.diagnosticoPreliminar,
+        observaciones: formData.observaciones,
+        condicion_general: formData.condicionGeneral,
+        es_seguimiento: formData.esSeguimiento
+      };
+
+      console.log('Datos de consulta preparados para enviar:', payload);
+
+      try {
+        let response;
+
+        if (consultaData) {
+          // Si existe, ACTUALIZAR
+          const url = `https://veterinariaclinicabackend-production.up.railway.app/api/v1/consultas/${consultaData.id_consulta}`;
+          response = await fetch(url, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+        } else {
+          alert('La creación de nuevas consultas aún no está implementada.');
+          return;
+        }
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log('Consulta actualizada correctamente:', result);
+
+        // 🚀 Aquí actualizas la disposición:
+        await actualizarDisposicion();
+
+        alert('Consulta actualizada correctamente.');
+        onComplete();
+
+      } catch (error) {
+        console.error('Error al guardar consulta:', error);
+        alert(`Error al guardar la consulta: ${error.message}`);
       }
+    };
 
-      const result = await response.json();
-      console.log('Consulta actualizada correctamente:', result);
-      alert('Consulta actualizada correctamente.');
-      onComplete();
-
-    } catch (error) {
-      console.error('Error al guardar consulta:', error);
-      alert(`Error al guardar la consulta: ${error.message}`);
-    }
-  };
 
   const handleModificarDiagnostico = (id) => {
     setDiagnosticoId(id);
