@@ -109,39 +109,7 @@ const VeterinariosView = () => {
 
   // Función de disponibilidad
   const getDisponibilidad = (veterinario) => {
-    if (!veterinario.disposicion) {
-      return 'Fuera de turno';
-    }
-
-    const now = new Date();
-    const currentHour = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTime = currentHour + currentMinutes / 60;
-
-    const turno = veterinario.turno?.toLowerCase();
-    
-    // Horarios de turno
-    const horarios = {
-      'mañana': { inicio: 7, fin: 13 },  // 7 AM a 1 PM
-      'tarde': { inicio: 13, fin: 19 },  // 1 PM a 7 PM
-      'noche': { inicio: 19, fin: 23 }   // 7 PM a 11 PM
-    };
-
-    // Si no tiene turno definido
-    if (!turno) {
-      return veterinario.disposicion;
-    }
-
-    const horario = horarios[turno];
-    
-    // Verificar turno
-    if (horario && currentTime >= horario.inicio && currentTime < horario.fin) {
-      // Está en turno
-      return veterinario.disposicion;
-    } else {
-      // Está fuera de turno
-      return 'Fuera de turno';
-    }
+    return veterinario.disposicion;
   };
 
   const clearFilters = () => {

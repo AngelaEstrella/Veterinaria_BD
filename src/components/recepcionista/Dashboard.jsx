@@ -7,8 +7,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     mascotas: 0,
     clientes: 0,
-    citas: 5, 
-    solicitudes: 10 
+    citas: 0, 
+    solicitudes: 0 
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,6 +34,22 @@ const Dashboard = () => {
       });
 
       const clientesResponse = await fetch(`${BASE_URL}/clientes/`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      const SolicitudesResponse = await fetch(`${BASE_URL}/solicitudes/`, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      const CitasResponse = await fetch(`${BASE_URL}/consultas/cita`, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -76,11 +92,61 @@ const Dashboard = () => {
         console.error('Error al cargar clientes:', clientesResponse.status);
       }
 
+      let SolicitudesPendientesCount = 0;
+      if (SolicitudesResponse.ok) {
+        const SolicitudesData = await SolicitudesResponse.json();
+        // Filtrar solo solicitudes pendientes
+        if (Array.isArray(SolicitudesData)) {
+          SolicitudesPendientesCount = SolicitudesData.filter(solicitud => 
+            solicitud.estado === 'Pendiente' || solicitud.estado === 'pendiente'
+          ).length;
+        } else if (SolicitudesData.solicitudes) {
+          const solicitudes = Array.isArray(SolicitudesData.solicitudes) ? SolicitudesData.solicitudes : [];
+          SolicitudesPendientesCount = solicitudes.filter(solicitud => 
+            solicitud.estado === 'Pendiente' || solicitud.estado === 'pendiente'
+          ).length;
+        }
+      } else {
+        console.error('Error al cargar solicitudes:', SolicitudesResponse.status);
+      }
+
+      let CitasHoyCount = 0;
+      if (CitasResponse.ok) {
+        const CitasData = await CitasResponse.json();
+
+        // Obtener fecha actual en Lima (solo YYYY-MM-DD)
+        const hoy = new Date().toLocaleDateString('es-PE', {
+          timeZone: 'America/Lima',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        });
+        const fechaHoyFormateada = hoy.split('/').reverse().join('-');
+
+        // Verificamos si recibimos un array directo o una propiedad 'citas'
+        const citas = Array.isArray(CitasData)
+          ? CitasData
+          : Array.isArray(CitasData.citas)
+          ? CitasData.citas
+          : [];
+
+        // Filtramos por fecha
+        CitasHoyCount = citas.filter(cita => {
+          const fechaCita = cita.fecha_hora_programada.split('T')[0];
+          return fechaCita === fechaHoyFormateada;
+        }).length;
+
+        console.log(`Número de citas para hoy (${fechaHoyFormateada}):`, CitasHoyCount);
+      } else {
+        console.error('Error al obtener las citas:', CitasResponse.status);
+      }
+
       // Actualizar estado con los datos obtenidos
       setStats(prevStats => ({
         ...prevStats,
         mascotas: mascotasCount,
-        clientes: clientesActivosCount
+        clientes: clientesActivosCount,
+        solicitudes: SolicitudesPendientesCount
       }));
 
     } catch (error) {
@@ -111,7 +177,7 @@ const Dashboard = () => {
     },
     { 
       title: 'Citas de hoy', 
-      value: stats.citas.toString().padStart(2, '0'), 
+      value: loading ? '...' : stats.citas.toString().padStart(2, '0'), 
       icon: 'https://i.ibb.co/qYHnQGk9/cita1-Comprimido.png',
       color: 'green' 
     },
@@ -123,7 +189,7 @@ const Dashboard = () => {
     },
     { 
       title: 'Solicitudes pendientes', 
-      value: stats.solicitudes.toString().padStart(2, '0'), 
+      value: loading ? '...' : stats.solicitudes.toString().padStart(2, '0'), 
       icon: 'https://i.ibb.co/qFFFykJk/Solicitud2-Comprimido.png',
       color: 'orange' 
     }
