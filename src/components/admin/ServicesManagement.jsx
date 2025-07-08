@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Table from '../common/Table';
 import Modal from '../common/Modal';
+import './ServicesManagement.css';
 
 const ServicesManagement = () => {
   const [servicios, setServicios] = useState([]);
@@ -393,158 +394,7 @@ const ServicesManagement = () => {
   ];
 
   // Estilos inline para coincidir con el diseño
-  const styles = {
-    container: {
-      padding: '20px',
-      backgroundColor: '#f5f5f5',
-      minHeight: '100vh'
-    },
-    header: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '20px'
-    },
-    filterSection: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '20px'
-    },
-    tipoFilter: {
-      backgroundColor: '#e0e0e0',
-      border: 'none',
-      padding: '10px 15px',
-      borderRadius: '4px',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      cursor: 'pointer',
-      minWidth: '150px'
-    },
-    additionalFilters: {
-      display: 'flex',
-      gap: '15px'
-    },
-    filterSpan: {
-      color: '#666',
-      fontSize: '14px',
-      cursor: 'pointer'
-    },
-    btnAgregar: {
-      backgroundColor: '#00bcd4',
-      color: 'white',
-      border: 'none',
-      padding: '12px 24px',
-      borderRadius: '25px',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      cursor: 'pointer'
-    },
-    searchSection: {
-      marginBottom: '20px'
-    },
-    searchContainer: {
-      position: 'relative',
-      maxWidth: '400px'
-    },
-    searchInput: {
-      width: '100%',
-      padding: '12px 15px 12px 45px',
-      border: '1px solid #ddd',
-      borderRadius: '25px',
-      backgroundColor: 'white',
-      color: '#333',
-      fontSize: '14px',
-      fontWeight: 'normal'
-    },
-    searchIcon: {
-      position: 'absolute',
-      left: '15px',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      color: '#666',
-      fontSize: '16px'
-    },
-    tableContainer: {
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-      overflow: 'hidden'
-    },
-    loadingIndicator: {
-      textAlign: 'center',
-      padding: '20px',
-      color: '#666',
-      fontStyle: 'italic'
-    },
-    errorContainer: {
-      textAlign: 'center',
-      padding: '40px 20px',
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-      margin: '20px 0'
-    },
-    formGroup: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '8px',
-      marginBottom: '15px'
-    },
-    formLabel: {
-      fontWeight: 'bold',
-      color: '#333',
-      fontSize: '14px'
-    },
-    formInput: {
-      padding: '12px',
-      border: '1px solid #ddd',
-      borderRadius: '4px',
-      fontSize: '14px'
-    },
-    btnGuardar: {
-      backgroundColor: '#6c757d',
-      color: 'white',
-      border: 'none',
-      padding: '12px 30px',
-      borderRadius: '4px',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      cursor: 'pointer',
-      alignSelf: 'center'
-    },
-    // Estilos para paginación
-    paginationContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: '10px',
-      marginTop: '20px',
-      padding: '20px'
-    },
-    paginationButton: {
-      backgroundColor: '#00bcd4',
-      color: 'white',
-      border: 'none',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      fontSize: '14px'
-    },
-    paginationButtonDisabled: {
-      backgroundColor: '#ccc',
-      color: '#666',
-      border: 'none',
-      padding: '8px 16px',
-      borderRadius: '4px',
-      cursor: 'not-allowed',
-      fontSize: '14px'
-    },
-    paginationInfo: {
-      color: '#666',
-      fontSize: '14px',
-      margin: '0 15px'
-    }
-  };
+
 
   if (error) {
     return (
@@ -562,163 +412,185 @@ const ServicesManagement = () => {
   const paginationInfo = getPaginationInfo();
 
   return (
-    <div style={styles.container}>
-      {/* Header con filtro y botón agregar */}
-      <div style={styles.header}>
-        <div style={styles.filterSection}>
-          <select 
-            style={styles.tipoFilter}
-            value={selectedTipoFilter} 
+    <>
+    <style jsx>{`
+  .services-management table th {
+    background: #68c1da !important;
+    color: white !important;
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+`}</style>
+    <div className="services-management">
+    {/* Cabecera principal */}
+    <div className="section-header">
+      <h2>GESTIÓN DE SERVICIOS</h2>
+      <button
+        onClick={handleAdd}
+        className="btn-add"
+        disabled={loading}
+      >
+        + AÑADIR SERVICIO
+      </button>
+    </div>
+
+    {/* Contenedor de la tabla y filtros */}
+    <div className="services-table-section">
+      <div className="table-header">
+        <h3>LISTA DE SERVICIOS</h3>
+
+        <div className="filters-container">
+          {/* Filtro por tipo */}
+          <select
+            value={selectedTipoFilter}
             onChange={(e) => setSelectedTipoFilter(e.target.value)}
+            className="filter-select"
           >
-            <option value="">IMÁGENES</option>
+            <option value="">Todos los tipos</option>
             {tiposServicio.map(tipo => (
               <option key={tipo.id_tipo_servicio} value={tipo.id_tipo_servicio}>
-                {tipo.descripcion?.toUpperCase()}
+                {tipo.descripcion}
               </option>
             ))}
           </select>
-          
-          <div style={styles.additionalFilters}>
-            <span style={styles.filterSpan}>Laboratorio</span>
-            <span style={styles.filterSpan}>Medicina Preventiva</span>
-          </div>
-        </div>
 
-        <button 
-          onClick={handleAdd} 
-          style={styles.btnAgregar}
-          disabled={loading}
-        >
-          AGREGAR +
-        </button>
-      </div>
-
-      {/* Barra de búsqueda */}
-      <div style={styles.searchSection}>
-        <div style={styles.searchContainer}>
-          <span style={styles.searchIcon}>🔍</span>
+          {/* Buscador */}
           <input
             type="text"
-            placeholder="NOMBRE O CÓDIGO"
-            style={styles.searchInput}
+            placeholder="Buscar por nombre o código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
           />
         </div>
       </div>
 
-      {/* Loading indicator */}
+      {/* Información de resultados */}
+      <div className="results-info">
+        <span>Total: {paginationInfo.totalItems} servicios</span>
+        <span>Página {paginationInfo.currentPage} de {paginationInfo.totalPages}</span>
+        <span>Mostrando: {serviciosPaginados.length} registros</span>
+      </div>
+
       {loading && (
-        <div style={styles.loadingIndicator}>
+        <div className="loading-container">
           Cargando servicios...
         </div>
       )}
 
-      {/* Tabla de servicios */}
-      <div style={styles.tableContainer}>
-        <Table 
-          columns={columns}
-          data={serviciosPaginados}
-          actions={actions}
-          emptyMessage="No hay servicios registrados"
-        />
-      </div>
-
-      {/* Paginación */}
-      {paginationInfo.totalPages > 1 && (
-        <div style={styles.paginationContainer}>
+      {error && (
+        <div className="error-message">
+          <p>{error}</p>
           <button
-            onClick={handlePrevPage}
-            disabled={!paginationInfo.hasPrev}
-            style={paginationInfo.hasPrev ? styles.paginationButton : styles.paginationButtonDisabled}
+            onClick={() => {
+              fetchTiposServicio();
+              fetchServicios();
+            }}
+            className="btn-retry"
           >
-            Anterior
-          </button>
-          
-          <span style={styles.paginationInfo}>
-            Página {paginationInfo.currentPage} de {paginationInfo.totalPages} 
-            ({paginationInfo.totalItems} servicios)
-          </span>
-          
-          <button
-            onClick={handleNextPage}
-            disabled={!paginationInfo.hasNext}
-            style={paginationInfo.hasNext ? styles.paginationButton : styles.paginationButtonDisabled}
-          >
-            Siguiente
+            Reintentar
           </button>
         </div>
       )}
 
-      {/* Modal para agregar/editar */}
-      <Modal
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        title={modalType === 'add' ? 'AGREGAR' : 'EDITAR'}
-      >
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>Tipo de servicio</label>
-            <select
-              name="id_tipo_servicio"
-              value={formData.id_tipo_servicio}
-              onChange={handleInputChange}
-              required
-              disabled={loading}
-              style={styles.formInput}
-            >
-              {modalType === 'add' && <option value="">elija un tipo</option>}
-              {tiposServicio.map(tipo => (
-                <option key={tipo.id_tipo_servicio} value={tipo.id_tipo_servicio}>
-                  {tipo.descripcion}
-                </option>
-              ))}
-            </select>
-          </div>
+      <Table
+        columns={columns}
+        data={serviciosPaginados}
+        actions={actions}
+        emptyMessage="No hay servicios registrados"
+      />
 
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>NOMBRES (*)</label>
-            <input
-              type="text"
-              name="nombre_servicio"
-              value={formData.nombre_servicio}
-              onChange={handleInputChange}
-              placeholder="RADIOGRAFIA"
-              required
-              disabled={loading}
-              style={styles.formInput}
-            />
-          </div>
+      {/* Paginación */}
+      {paginationInfo.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={handlePrevPage}
+            disabled={!paginationInfo.hasPrev}
+            className="pagination-btn"
+          >
+            ← Anterior
+          </button>
 
-          <div style={styles.formGroup}>
-            <label style={styles.formLabel}>PRECIO (*)</label>
-            <input
-              type="number"
-              name="precio"
-              value={formData.precio}
-              onChange={handleInputChange}
-              placeholder="S/..."
-              step="0.01"
-              min="0"
-              required
-              disabled={loading}
-              style={styles.formInput}
-            />
-          </div>
+          <span className="pagination-info">
+            Página {paginationInfo.currentPage} de {paginationInfo.totalPages}
+          </span>
 
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-            <button 
-              type="submit"
-              disabled={loading}
-              style={styles.btnGuardar}
-            >
-              {loading ? 'Guardando...' : 'GUARDAR'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+          <button
+            onClick={handleNextPage}
+            disabled={!paginationInfo.hasNext}
+            className="pagination-btn"
+          >
+            Siguiente →
+          </button>
+        </div>
+      )}
     </div>
+
+    {/* Modal */}
+    <Modal
+      isOpen={showModal}
+      onClose={() => setShowModal(false)}
+      title={modalType === 'add' ? 'AGREGAR SERVICIO' : 'EDITAR SERVICIO'}
+      size="large"
+    >
+      <form onSubmit={handleSubmit} className="service-form">
+        <div className="form-group">
+          <label>Tipo de servicio (*)</label>
+          <select
+            name="id_tipo_servicio"
+            value={formData.id_tipo_servicio}
+            onChange={handleInputChange}
+            required
+          >
+            {modalType === 'add' && <option value="">Seleccione un tipo</option>}
+            {tiposServicio.map(tipo => (
+              <option key={tipo.id_tipo_servicio} value={tipo.id_tipo_servicio}>
+                {tipo.descripcion}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-group">
+          <label>Nombre (*)</label>
+          <input
+            type="text"
+            name="nombre_servicio"
+            value={formData.nombre_servicio}
+            onChange={handleInputChange}
+            required
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Precio (*)</label>
+          <input
+            type="number"
+            name="precio"
+            value={formData.precio}
+            onChange={handleInputChange}
+            min="0"
+            required
+          />
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="submit"
+            className="btn-submit"
+            disabled={loading}
+          >
+            {loading ? 'Guardando...' : 'GUARDAR'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  </div>
+  </>
   );
 };
 
