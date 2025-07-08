@@ -3,6 +3,78 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import AppBar from '../components/common/AppBar';
 import Sidebar from '../components/common/Sidebar';
+import Dashboard from '../components/admin/Dashboard';
+import UserManagement from '../components/admin/UserManagement';
+import VetManagement from '../components/admin/VetManagement';
+import ReceptionistManagement from '../components/admin/ReceptionistManagement';
+import ServicesManagement from '../components/admin/ServicesManagement';
+import '../styles/Dashboard.css';
+
+const AdminDashboard = () => {
+  const { user } = useAuth();
+  const [activeView, setActiveView] = useState('inicio');
+
+  const getUserDisplayName = () => {
+    if (user?.name && user.name !== user?.username) {
+      return user.name;
+    }
+    if (user?.session_info?.nombre_completo) {
+      return user.session_info.nombre_completo;
+    }
+    return user?.username || 'ADMINISTRADOR';
+  };
+
+  const sidebarItems = [
+    { id: 'inicio', label: 'Inicio', icon: '🏠' },
+    { id: 'usuarios', label: 'Usuarios', icon: '👥' },
+    { id: 'veterinarios', label: 'Veterinarios', icon: '👨‍⚕️' },
+    { id: 'recepcionistas', label: 'Recepcionistas', icon: '👩‍💼' },
+    { id: 'servicios', label: 'Servicios', icon: '🏥' }
+  ];
+
+  const renderContent = () => {
+    switch (activeView) {
+      case 'usuarios':
+        return <UserManagement />;
+      case 'veterinarios':
+        return <VetManagement />;
+      case 'recepcionistas':
+        return <ReceptionistManagement />;
+      case 'servicios':
+        return <ServicesManagement />;
+      default:
+        return <Dashboard />;
+    }
+  };
+
+  return (
+    <div className="dashboard-layout">
+      <Sidebar 
+        items={sidebarItems} 
+        activeItem={activeView}
+        onItemClick={setActiveView}
+      />
+      
+      <div className="main-content">
+        <AppBar 
+          title="🟢 Cuenta de:"
+          subtitle={getUserDisplayName()}
+        />
+        
+        <div className="dashboard-content">
+          {renderContent()}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
+/*
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import AppBar from '../components/common/AppBar';
+import Sidebar from '../components/common/Sidebar';
 import UserManagement from '../components/admin/UserManagement';
 import VetManagement from '../components/admin/VetManagement';
 import ReceptionistManagement from '../components/admin/ReceptionistManagement';
@@ -90,4 +162,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminDashboard; */
